@@ -1,0 +1,33 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "DevShowcase API",
+    "description": "API completa de vitrine de projetos em Node.js, Express, TypeScript e Prisma",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/projects": {
+      "get": {
+        "summary": "Listar projetos com paginação e filtro por tecnologia",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer" } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer" } },
+          { "name": "technology", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Lista de projetos retornada com sucesso" } }
+      }
+    },
+    "/api/projects/{id}/upvote": {
+      "put": {
+        "summary": "Incrementar curtidas do projeto",
+        "responses": { "200": { "description": "Upvote registrado" }, "404": { "description": "Projeto não encontrado" } }
+      }
+    },
+    "/api/projects/{id}/feedbacks": {
+      "post": {
+        "summary": "Cadastrar feedback e atualizar nota média",
+        "responses": { "201": { "description": "Feedback registrado" }, "400": { "description": "Nota inválida" } }
+      }
+    }
+  }
+}
