@@ -1,23 +1,19 @@
 import express from 'express';
-import cors from 'cors';
+import projectRoutes from './project.routes';
 import profileRoutes from './profile.routes';
-import { projectRoutes } from './project.routes';
-// importe suas outras rotas se houver
-import { errorHandler } from './middlewares/errorHandler';
+import technologyRoutes from './technology.routes';
 
 const app = express();
 
-app.use(cors());
 app.use(express.json());
 
-// Registrar rotas
-app.use('/api', profileRoutes);
+// Registra as rotas sob o prefixo /api
 app.use('/api', projectRoutes);
-
-// Middleware global de tratamento de erros (DEVE SER O ÚLTIMO app.use)
-app.use(errorHandler);
+app.use('/api', profileRoutes);
+app.use('/api', technologyRoutes);
 
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });

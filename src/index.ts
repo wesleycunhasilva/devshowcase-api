@@ -1,12 +1,19 @@
-import { Router } from 'express';
+import express from 'express';
+import projectRoutes from './project.routes';
 import profileRoutes from './profile.routes';
 import technologyRoutes from './technology.routes';
-import { projectRoutes } from './project.routes';
 
-const routes = Router();
+const app = express();
 
-routes.use('/profiles', profileRoutes);
-routes.use('/technologies', technologyRoutes);
-routes.use('/projects', projectRoutes);
+app.use(express.json());
 
-export default routes;
+// Registra as rotas sob o prefixo /api
+app.use('/api', projectRoutes);
+app.use('/api', profileRoutes);
+app.use('/api', technologyRoutes);
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
+});
