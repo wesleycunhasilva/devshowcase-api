@@ -2,10 +2,11 @@
   "name": "devshowcase-api",
   "version": "1.0.0",
   "description": "Backend DevShowcase API",
-  "main": "src/server.ts",
+  "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
+    "start": "node dist/server.js",
     "prisma:generate": "npx prisma generate"
   },
   "keywords": [],
