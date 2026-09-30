@@ -1,10 +1,9 @@
 import { Router } from 'express';
-import { ProfileController } from '../controllers/ProfileController';
 
-const profileRoutes = Router();
-const profileController = new ProfileController();
+const router = Router();
 
-profileRoutes.post('/', profileController.create);
-profileRoutes.get('/:id', profileController.findById);
+router.get('/', (req, res) => {
+  return res.status(200).json([{ id: 1, name: "Perfil de Teste" }]);
+});
 
-export { profileRoutes };
+export default router;
