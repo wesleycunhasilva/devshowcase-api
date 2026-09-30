@@ -1,26 +1,97 @@
-import { Router } from 'express';
-import { ProfileController } from './controllers/ProfileController';
-import { TechnologyController } from './controllers/TechnologyController';
-import { ProjectController } from './controllers/ProjectController';
-import { FeedbackController } from './controllers/FeedbackController';
+import { Router, Request, Response } from 'express';
+import { prisma } from './database';
 
-const routes = Router();
+export const routes = Router();
 
-const profileController = new ProfileController();
-const technologyController = new TechnologyController();
-const projectController = new ProjectController();
-const feedbackController = new FeedbackController();
+/* ==========================================================================
+   1. PERFIL (PROFILE)
+   ========================================================================== */
 
-routes.get('/profiles', profileController.index);
-routes.post('/profiles', profileController.create);
+// POST /api/profiles - Criar perfil
+routes.post('/api/profiles', async (req: Request, res: Response) => {
+  const { name, email, bio } = req.body;
 
-routes.get('/technologies', technologyController.index);
-routes.post('/technologies', technologyController.create);
+  if (!name || !email) {
+    return res.status(400).json({ error: 'Nome e email são obrigatórios.' });
+  }
 
-routes.get('/projects', projectController.index);
-routes.post('/projects', projectController.create);
+  try {
+    const profile = await prisma.profile.create({
+      data: { name, email, bio }
+    });
+    return res.status(201).json(profile);
+  } catch (error: any) {
+    return res.status(400).json({ error: 'Erro ao criar perfil. O e-mail pode já estar cadastrado.' });
+  }
+});
 
-routes.get('/feedbacks', feedbackController.index);
-routes.post('/feedbacks', feedbackController.create);
+// GET /api/profiles/:id - Buscar perfil por ID com seus projetos
+routes.get('/api/profiles/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
 
-export { routes };
+  try {
+    const profile = await prisma.profile.findUnique({
+      where: { id: Number(id) },
+      include: { projects: true }
+    });
+
+    if (!profile) {
+      return res.status(404).json({ error: 'Perfil não encontrado.' });
+    }
+
+    return res.json(profile);
+  } catch (error) {
+    return res.status(500).json({ error: 'Erro ao buscar perfil.' });
+  }
+});
+
+
+/* ==========================================================================
+   2. TECNOLOGIA (TECHNOLOGY)
+   ========================================================================== */
+
+// POST /api/technologies - Cadastrar tecnologia
+routes.post('/api/technologies', async (req: Request, res: Response) => {
+  const { name } = req.body;
+
+  if (!name) {
+    return res.status(400).json({ error: 'O nome da tecnologia é obrigatório.' });
+  }
+
+  try {
+    const tech = await prisma.technology.create({
+      data: { name }
+    });
+    return res.status(201).json(tech);
+  } catch (error) {
+    return res.status(400).json({ error: 'Tecnologia já cadastrada.' });
+  }
+});
+
+
+/* ==========================================================================
+   3. PROJETO (PROJECT)
+   ========================================================================== */
+
+// POST /api/projects - Cadastrar projeto vinculado a perfil
+routes.post('/api/projects', async (req: Request, res: Response) => {
+  const { title, description, repositoryUrl, profileId } = req.body;
+
+  if (!title || !description || !repositoryUrl || !profileId) {
+    return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
+  }
+
+  try {
+    const project = await prisma.project.create({
+      data: {
+        title,
+        description,
+        repositoryUrl,
+        profileId: Number(profileId)
+      }
+    });
+    return res.status(201).json(project);
+  } catch (error) {
+    return res.status(400).json({ error: 'Perfil associado não encontrado ou dados inválidos.' });
+  }
+});
