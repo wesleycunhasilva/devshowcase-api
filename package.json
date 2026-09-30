@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "Backend DevShowcase API",
   "main": "src/server.ts",
-  "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "prisma:generate": "npx prisma generate",
-    "prisma:push": "npx prisma db push"
-  },
+ "scripts": {
+  "dev": "tsx watch src/server.ts",
+  "build": "tsc",
+  "prisma:generate": "npx prisma generate"
+}
   "keywords": [],
   "author": "",
   "license": "ISC",
