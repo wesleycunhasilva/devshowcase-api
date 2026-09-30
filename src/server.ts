@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { profileRoutes } from './profile.routes';
+import profileRoutes from './profile.routes';
 import { projectRoutes } from './project.routes';
 // importe suas outras rotas se houver
 import { errorHandler } from './middlewares/errorHandler';
