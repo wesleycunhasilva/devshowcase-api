@@ -7,7 +7,7 @@ const app = express();
 
 app.use(express.json());
 
-// Registra as rotas sob o prefixo /api
+// Registro de todas as rotas da API sob o prefixo /api
 app.use('/api', projectRoutes);
 app.use('/api', profileRoutes);
 app.use('/api', technologyRoutes);
