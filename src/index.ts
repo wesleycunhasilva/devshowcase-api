@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { profileRoutes } from './profile.routes';
-import { technologyRoutes } from './technology.routes';
+import profileRoutes from './profile.routes';
+import technologyRoutes from './technology.routes';
 import { projectRoutes } from './project.routes';
 
 const routes = Router();
