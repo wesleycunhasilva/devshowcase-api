@@ -1,6 +1,10 @@
 ﻿node_modules
 .env
+.env*
+!.env.example
 *.db
 *.db-journal
+*.sqlite
+*.sqlite3
 dist
 .DS_Store

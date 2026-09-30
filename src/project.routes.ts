@@ -1,9 +1,40 @@
 import { Router } from 'express';
 import { prisma } from './lib/prisma';
+import { projectCreateSchema } from './dto/project.dto';
+import { createProject, listProjects } from './repositories/project.repository';
 
 const router = Router();
 
-// 1. POST: Cadastrar feedback e atualizar nota média (averageRating)
+router.post('/projects', async (req, res, next) => {
+  try {
+    const payload = projectCreateSchema.parse(req.body);
+
+    const profileExists = await prisma.profile.findUnique({ where: { id: payload.profileId } });
+    if (!profileExists) {
+      return res.status(404).json({ message: 'Perfil informado não encontrado.' });
+    }
+
+    const project = await createProject({
+      title: payload.title,
+      description: payload.description,
+      repositoryUrl: payload.repositoryUrl,
+      deployUrl: payload.deployUrl,
+      profileId: payload.profileId,
+      technologies: payload.technologies,
+    });
+
+    return res.status(201).json(project);
+  } catch (error: any) {
+    if (error?.name === 'ZodError') {
+      return res.status(400).json({
+        message: error.errors[0]?.message ?? 'Dados inválidos para criação do projeto.',
+      });
+    }
+
+    next(error);
+  }
+});
+
 router.post('/projects/:id/feedbacks', async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -11,39 +42,38 @@ router.post('/projects/:id/feedbacks', async (req, res, next) => {
 
     const projectId = Number(id);
 
-    // Validação de nota (1 a 5)
-    if (!rating || rating < 1 || rating > 5) {
-      return res.status(400).json({ error: 'A nota (rating) deve ser um número entre 1 e 5.' });
+    if (!Number.isInteger(projectId) || projectId <= 0) {
+      return res.status(400).json({ message: 'O identificador do projeto deve ser um número válido.' });
     }
 
-    // Verificar se o projeto existe
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: 'A nota (rating) deve ser um número entre 1 e 5.' });
+    }
+
     const projectExists = await prisma.project.findUnique({ where: { id: projectId } });
     if (!projectExists) {
-      return res.status(404).json({ error: 'Projeto não encontrado.' });
+      return res.status(404).json({ message: 'Projeto não encontrado.' });
     }
 
-    // Criar o feedback
     await prisma.feedback.create({
       data: {
         rating: Number(rating),
-        comment,
+        comment: comment ?? '',
         projectId,
       },
     });
 
-    // Recalcular a média das notas do projeto
     const aggregate = await prisma.feedback.aggregate({
       where: { projectId },
       _avg: { rating: true },
     });
 
-    const newAverage = aggregate._avg.rating || 0;
-
-    // Atualizar a nota média no projeto
     const updatedProject = await prisma.project.update({
       where: { id: projectId },
-      data: { averageRating: newAverage },
-      include: { feedbacks: true },
+      data: {
+        averageRating: aggregate._avg.rating ?? 0,
+      },
+      include: { feedbacks: true, technologies: true, profile: true },
     });
 
     return res.status(201).json(updatedProject);
@@ -52,15 +82,16 @@ router.post('/projects/:id/feedbacks', async (req, res, next) => {
   }
 });
 
-// 2. PUT: Incrementar Upvote
 router.put('/projects/:id/upvote', async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const projectId = Number(id);
+    const projectId = Number(req.params.id);
+    if (!Number.isInteger(projectId) || projectId <= 0) {
+      return res.status(400).json({ message: 'O identificador do projeto deve ser um número válido.' });
+    }
 
     const projectExists = await prisma.project.findUnique({ where: { id: projectId } });
     if (!projectExists) {
-      return res.status(404).json({ error: 'Projeto não encontrado.' });
+      return res.status(404).json({ message: 'Projeto não encontrado.' });
     }
 
     const project = await prisma.project.update({
@@ -74,51 +105,14 @@ router.put('/projects/:id/upvote', async (req, res, next) => {
   }
 });
 
-// 3. GET: Listar Projetos com Filtro por Tecnologia e Paginação
 router.get('/projects', async (req, res, next) => {
   try {
     const { page = '1', limit = '10', technology } = req.query;
+    const pageNumber = Math.max(1, Number(page));
+    const limitNumber = Math.max(1, Number(limit));
 
-    const pageNum = Math.max(1, Number(page));
-    const limitNum = Math.max(1, Number(limit));
-    const skip = (pageNum - 1) * limitNum;
-
-    // Filtro condicional por tecnologia
-    const whereCondition = technology
-      ? {
-          technologies: {
-            some: {
-              name: {
-                contains: String(technology),
-                mode: 'insensitive' as const,
-              },
-            },
-          },
-        }
-      : {};
-
-    const [projects, total] = await Promise.all([
-      prisma.project.findMany({
-        where: whereCondition,
-        skip,
-        take: limitNum,
-        include: {
-          feedbacks: true,
-          technologies: true,
-        },
-      }),
-      prisma.project.count({ where: whereCondition }),
-    ]);
-
-    return res.json({
-      data: projects,
-      meta: {
-        total,
-        page: pageNum,
-        limit: limitNum,
-        totalPages: Math.ceil(total / limitNum),
-      },
-    });
+    const result = await listProjects(pageNumber, limitNumber, technology ? String(technology) : undefined);
+    return res.json(result);
   } catch (error) {
     next(error);
   }

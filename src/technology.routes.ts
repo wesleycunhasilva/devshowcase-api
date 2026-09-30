@@ -1,30 +1,31 @@
 import { Router } from 'express';
-import { prisma } from './lib/prisma';
+import { technologyCreateSchema } from './dto/technology.dto';
+import { createTechnology, listTechnologies } from './repositories/technology.repository';
 
 const router = Router();
 
-// POST: Criar Tecnologia
-router.post('/technologies', async (req, res) => {
+router.post('/technologies', async (req, res, next) => {
   try {
-    const { name } = req.body;
-
-    const technology = await prisma.technology.create({
-      data: { name },
-    });
-
+    const payload = technologyCreateSchema.parse(req.body);
+    const technology = await createTechnology({ name: payload.name });
     return res.status(201).json(technology);
-  } catch (error) {
-    return res.status(400).json({ error: 'Erro ao criar tecnologia' });
+  } catch (error: any) {
+    if (error?.name === 'ZodError') {
+      return res.status(400).json({
+        message: error.errors[0]?.message ?? 'Dados inválidos para criação da tecnologia.',
+      });
+    }
+
+    next(error);
   }
 });
 
-// GET: Listar Tecnologias
-router.get('/technologies', async (req, res) => {
+router.get('/technologies', async (_req, res, next) => {
   try {
-    const technologies = await prisma.technology.findMany();
+    const technologies = await listTechnologies();
     return res.json(technologies);
   } catch (error) {
-    return res.status(500).json({ error: 'Erro ao buscar tecnologias' });
+    next(error);
   }
 });
 

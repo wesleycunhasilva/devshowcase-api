@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import projectRoutes from './project.routes';
@@ -5,7 +6,7 @@ import profileRoutes from './profile.routes';
 import technologyRoutes from './technology.routes';
 import swaggerDocument from './swagger.json';
 
-const app = express();
+export const app = express();
 
 app.use(express.json());
 
@@ -40,9 +41,14 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
+export function startServer(port = Number(process.env.PORT) || 3000) {
+  return app.listen(port, () => {
+    console.log(`🚀 Servidor rodando na porta ${port}`);
+    console.log(`📚 Documentação Swagger disponível em /api/docs`);
+  });
+}
 
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando na porta ${PORT}`);
-  console.log(`📚 Documentação Swagger disponível em /api/docs`);
-});
+if (require.main === module) {
+  const PORT = Number(process.env.PORT) || 3000;
+  startServer(PORT);
+}
