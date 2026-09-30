@@ -1,0 +1,7 @@
+# Use this workspace to collaborate
+workspace:
+  id: 4c5033c6-7719-4caf-a907-a6ce1f4decb5
+
+localResources:
+  specs:
+    - ../src/swagger.json

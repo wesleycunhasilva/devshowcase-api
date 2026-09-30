@@ -1,0 +1,12 @@
+$kind: http-request
+url: http://localhost:3000/api/technologies
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "name": "React Native"
+    }
+order: 3000

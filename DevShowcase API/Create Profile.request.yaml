@@ -1,0 +1,14 @@
+$kind: http-request
+url: http://localhost:3000/api/profiles
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "name": "Ana Postman",
+      "email": "ana.postman@example.com",
+      "bio": "Desenvolvedora full-stack"
+    }
+order: 1000
