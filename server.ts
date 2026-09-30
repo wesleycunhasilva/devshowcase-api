@@ -1,29 +1,23 @@
 import express from 'express';
+import cors from 'cors';
+import { profileRoutes } from './profile.routes';
+import { projectRoutes } from './project.routes';
+// importe suas outras rotas se houver
+import { errorHandler } from './middlewares/errorHandler';
 
 const app = express();
 
-// Habilita recebimento de JSON no body das requisições
+app.use(cors());
 app.use(express.json());
 
-// Rota 1: Perfis
-app.get('/api/profiles', (req, res) => {
-  return res.json([{ id: 1, name: "Roger Cardoso" }]);
-});
+// Registrar rotas
+app.use('/api', profileRoutes);
+app.use('/api', projectRoutes);
 
-// Rota 2: Tecnologias
-app.post('/api/technologies', (req, res) => {
-  const { name } = req.body;
-  return res.status(201).json({ id: 1, name: name || "TypeScript" });
-});
+// Middleware global de tratamento de erros (DEVE SER O ÚLTIMO app.use)
+app.use(errorHandler);
 
-// Rota 3: Projetos
-app.post('/api/projects', (req, res) => {
-  const { title, description } = req.body;
-  return res.status(201).json({ id: 1, title: title || "DevShowcase API", description });
-});
-
-// Inicialização do servidor na porta 3333 para evitar conflitos com a porta 3000
-const PORT = 3333;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Servidor rodando com sucesso na porta ${PORT} 🚀`);
+  console.log(`Server is running on port ${PORT}`);
 });
