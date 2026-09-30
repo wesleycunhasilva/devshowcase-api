@@ -98,7 +98,7 @@ projectRoutes.post('/projects', async (req, res, next) => {
   }
 });
 
-// 3. PUT /api/projects/{id}/upvote (Atualizar curtidas/estrelas)
+// 3. PUT /api/projects/:id/upvote (Atualizar curtidas/estrelas)
 projectRoutes.put('/projects/:id/upvote', async (req, res, next) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -129,7 +129,7 @@ projectRoutes.put('/projects/:id/upvote', async (req, res, next) => {
   }
 });
 
-// 4. POST /api/projects/{id}/feedbacks (Cadastrar feedback e recalcular média)
+// 4. POST /api/projects/:id/feedbacks (Cadastrar feedback e recalcular média)
 projectRoutes.post('/projects/:id/feedbacks', async (req, res, next) => {
   try {
     const projectId = parseInt(req.params.id, 10);
