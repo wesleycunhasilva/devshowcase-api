@@ -1,6 +1,8 @@
-import { PrismaClient } from '@prisma/client';
-
-export const prisma = new PrismaClient();
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.prisma = void 0;
+const client_1 = require("@prisma/client");
+exports.prisma = new client_1.PrismaClient();
 // Adicionar após a criação das tabelas no database.ts
 db.exec(`
   CREATE TABLE IF NOT EXISTS feedbacks (

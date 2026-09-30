@@ -1,11 +1,19 @@
+datasource db {
+  provider = "postgresql" // Se estiver usando Supabase. Se for SQLite local, mude para "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
 model Profile {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String
-  email     String   @unique
+  email     String    @unique
   bio       String?
-  githubUrl String?
   projects  Project[]
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 }
 
 model Project {
@@ -17,23 +25,23 @@ model Project {
   upvotes       Int          @default(0)
   averageRating Float        @default(0.0)
   profileId     Int
-  profile       Profile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  technologies  Technology[] @relation("ProjectToTechnology")
+  profile       Profile      @relation(fields: [profileId], references: [id])
   feedbacks     Feedback[]
+  technologies  Technology[]
   createdAt     DateTime     @default(now())
+}
+
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  comment   String?
+  projectId Int
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }
 
 model Technology {
   id       Int       @id @default(autoincrement())
   name     String    @unique
-  projects Project[] @relation("ProjectToTechnology")
-}
-
-model Feedback {
-  id        Int      @id @default(autoincrement())
-  rating    Int      // 1 a 5
-  comment   String
-  projectId Int
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  projects Project[]
 }
